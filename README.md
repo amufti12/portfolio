@@ -1,6 +1,6 @@
 # Aydan Mufti - Data Science & Engineering Portfolio
 
-Hi! I'm Aydan, a data scientist and software engineer with a Master's in Data Science from Boston University (4.0 GPA) and a background in Computer Science from Kennesaw State University. My work spans machine learning, systems programming, and full-stack data pipelines. I'm passionate about building things that are both rigorous and useful — from predictive safety systems for the NFL to real-time sorting algorithm visualizers.
+Hi! I'm Aydan, a data scientist and software engineer with a Master's in Data Science from Boston University (4.0 GPA) and a background in Computer Science from Kennesaw State University. My work spans machine learning, systems programming, and full-stack data pipelines. I'm passionate about building things that are both rigorous and useful - from predictive safety systems for the NFL to real-time sorting algorithm visualizers.
 
 Currently working as a Quality Assurance Engineer at Carrier Global Corporation, where I build PowerBI dashboards and automate testing processes. Actively seeking Data Scientist roles.
 
@@ -12,11 +12,12 @@ aydanmufti@gmail.com &nbsp;|&nbsp; [github.com/amufti12](https://github.com/amuf
 
 1. [NFL Injury Prediction and Risk Analysis System](#nfl-injury-prediction)
 2. [HuffPost News Classification (DistilBERT)](#huffpost-classification)
-3. [NHTSA Vehicle Complaints - Azure Cloud Pipeline & Power BI Dashboard](#nhtsa-powerbi)
-4. [AlgoViz - Sorting Algorithm Visualizer](#algoviz)
-5. [N-Body Gravitational Simulator](#nbody-simulator)
-6. [Spotify Song Prediction](#song-prediction)
-7. [Video-to-Video Synthesis (C-Day 2021)](#vid2vid)
+3. [Elden Ring Build Optimizer Agent](#elden-ring-agent)
+4. [NHTSA Vehicle Complaints - Azure Cloud Pipeline & Power BI Dashboard](#nhtsa-powerbi)
+5. [AlgoViz - Sorting Algorithm Visualizer](#algoviz)
+6. [N-Body Gravitational Simulator](#nbody-simulator)
+7. [Spotify Song Prediction](#song-prediction)
+8. [Video-to-Video Synthesis (C-Day 2021)](#vid2vid)
 
 ---
 
@@ -71,6 +72,65 @@ A natural language processing project fine-tuning DistilBERT on HuffPost news he
 - Transformer-based embeddings significantly outperform classical bag-of-words approaches for headline classification
 - Macro-F1 of 0.661 reflects meaningful performance across imbalanced category distribution
 - Short headline text presents inherent ambiguity — performance ceiling is constrained by label overlap across categories
+ 
+---
+
+## [Elden Ring Build Optimizer Agent](https://github.com/amufti12/Elden-Ring-Build-Optimizer) <a name="elden-ring-agent"></a>
+ 
+#### Overview
+A 10-tool AI agent that recommends complete character builds in Elden Ring (including the Shadow of the Erdtree DLC) by querying a structured 29MB dataset of weapons, upgrades, armor, spells, talismans, and locations — returning data-backed, verifiable recommendations rather than relying on model training knowledge.
+ 
+The agent accepts a natural language build request and autonomously decides which data sources to query, in what order, and how many times — iterating in a ReAct-style loop until it has enough information to produce a complete recommendation covering weapons, affinity, talismans, armor, spirit ash summon, and item locations.
+ 
+#### Technical Details
+- **Model**: Gemini (gemini-flash-latest) with function calling
+- **Dataset**: [Ultimate Elden Ring with Shadow of the Erdtree DLC](https://www.kaggle.com/datasets/pedroaltobelli/ultimate-elden-ring-with-shadow-of-the-erdtree-dlc) — 15 CSV files, 247 columns, 29MB (CC0 Public Domain)
+- **Tools**: Python (pandas, google-genai), Jupyter Notebook
+#### Agent Architecture
+ 
+```
+User query
+    ↓
+Gemini with 10 defined tools
+    ↓
+Model decides which tool(s) to call
+    ↓
+Tool executes pandas query over cleaned CSV data
+    ↓
+Result fed back into conversation
+    ↓
+Repeat until model produces final answer
+```
+ 
+The 18MB upgrade table is never loaded into model context — queried on demand via tools, keeping token usage minimal and answers accurate.
+ 
+#### Tools
+ 
+| Tool | Data Source | Purpose |
+|---|---|---|
+| `query_weapons_by_stat` | `weapons_upgrades.csv` | Filter weapons by scaling grade and stat requirements |
+| `get_weapon_upgrades` | `weapons_upgrades.csv` | Compare all affinities at max upgrade for a specific weapon |
+| `query_talismans` | `talismans.csv` | Search talismans by keyword in name, effect, or description |
+| `query_ashes_of_war` | `ashesOfWar.csv` | Find weapon skills by affinity or skill name |
+| `query_spells` | `incantations.csv`, `sorceries.csv` | Search spells by stat requirement and keyword |
+| `query_spirit_ashes` | `spiritAshes.csv` | Find summons by FP/HP cost or keyword |
+| `query_armor` | `armors.csv` | Search armor by type, weight, or special effect |
+| `query_skills` | `skills.csv` | Detailed skill info and equipment compatibility |
+| `query_shields` | `shields_upgrades.csv` | Find shields by category or stat scaling |
+| `query_locations` | `locations.csv` | Find which areas contain specific items or bosses |
+ 
+#### Key Engineering Decisions
+- **Somber weapons fix**: The dataset mislabeled unique weapons (Blasphemous Blade, Rivers of Blood, Moonveil, etc.) as `Standard` through `Standard +10` instead of `Somber +1` through `Somber +10`. The standard max upgrade filter of `Standard +25` silently excluded all of them. Identified the pattern and added `Standard +10` as a valid max upgrade tier alongside `Standard +25`
+- **Stringified dict parsing**: Attack power, stat scaling, and requirements were stored as Python dict strings scraped from the wiki. Used `ast.literal_eval` to parse into usable structures before any filtering or computation
+- **Scaling grade normalization**: Letter grades (S/A/B/C/D/E) converted to numeric (6/5/4/3/2/1) so weapons can be filtered and sorted by scaling quality rather than just raw attack power
+#### Build Types Tested
+ 
+| Build | Primary Stat | Key Result |
+|---|---|---|
+| Faith/Strength — Holy Knight | 60 Fai / 40 Str | Blasphemous Blade and Maliketh's Black Blade correctly surfaced after somber weapons fix |
+| Arcane/Dexterity — Bleed | 60 Arc / 20 Dex | Correctly chose Occult over Blood affinity at 60 Arcane; found Black Whetblade requirement unprompted |
+| Intelligence — Pure Sorcerer | 70 Int / 20 Mnd | Recommended Academy Glintstone Staff over Lusat's specifically due to the 20 Mind constraint |
+| Dexterity — Samurai/Blademaster | 80 Dex | Found Okina Mask and Curseblade Mask for +Dex helm slot; recommended Black Knife Tiche |
  
 ---
  
