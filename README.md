@@ -13,11 +13,12 @@ aydanmufti@gmail.com &nbsp;|&nbsp; [github.com/amufti12](https://github.com/amuf
 1. [NFL Injury Prediction and Risk Analysis System](#nfl-injury-prediction)
 2. [HuffPost News Classification (DistilBERT)](#huffpost-classification)
 3. [Elden Ring Build Optimizer Agent](#elden-ring-agent)
-4. [NHTSA Vehicle Complaints - Azure Cloud Pipeline & Power BI Dashboard](#nhtsa-powerbi)
-5. [AlgoViz - Sorting Algorithm Visualizer](#algoviz)
-6. [N-Body Gravitational Simulator](#nbody-simulator)
-7. [Spotify Song Prediction](#song-prediction)
-8. [Video-to-Video Synthesis (C-Day 2021)](#vid2vid)
+4. [Twitch Streamer Retention Analysis](#twitch-retention)
+5. [NHTSA Vehicle Complaints - Azure Cloud Pipeline & Power BI Dashboard](#nhtsa-powerbi)
+6. [AlgoViz - Sorting Algorithm Visualizer](#algoviz)
+7. [N-Body Gravitational Simulator](#nbody-simulator)
+8. [Spotify Song Prediction](#song-prediction)
+9. [Video-to-Video Synthesis (C-Day 2021)](#vid2vid)
 
 ---
 
@@ -132,6 +133,29 @@ The 18MB upgrade table is never loaded into model context — queried on demand 
 | Intelligence — Pure Sorcerer | 70 Int / 20 Mnd | Recommended Academy Glintstone Staff over Lusat's specifically due to the 20 Mind constraint |
 | Dexterity — Samurai/Blademaster | 80 Dex | Found Okina Mask and Curseblade Mask for +Dex helm slot; recommended Black Knife Tiche |
  
+---
+
+## [Twitch Streamer Retention Analysis](https://github.com/amufti12/Twitch-Streamer-Retention-Analysis) <a name="twitch-retention"></a>
+
+#### Overview
+A cross-year SQL and Python analysis of Twitch's top 1,000 streamers, comparing 2021 and 2024 snapshots to answer questions a single-year dataset can't: who stays on top, whether commonly assumed "best practices" (like a specific best day to stream) hold up under statistical testing, and how volatile the platform's top tier actually is. Originated as an extension of the [Codedex "Analyze Twitch Data with SQLite" tutorial](https://www.codedex.io/projects/analyze-twitch-data-with-sqlite), with the cross-year join, retention analysis, trend estimation, and significance testing built out as original work beyond the tutorial's single-year descriptive scope.
+
+#### Technical Details
+- **Datasets**: Two Kaggle datasets of Twitch's top 1,000 streamers (2021 and 2024 snapshots)
+- **Pipeline**: CSV ingestion into a cleaned SQLite database, with game-name casing normalization and genre classification handled in a versioned Python/JSON config rather than inline SQL, plus automated logging of data-quality checks (e.g., blank-line row discrepancies) at load time
+- **Analysis**: Cross-year join on normalized streamer identity to compute retention; two-point growth trend estimation explicitly framed as directional rather than a validated forecast; chi-square goodness-of-fit and independence testing to validate claims rather than reporting raw counts at face value
+- **Tools**: Python (pandas, NumPy, SciPy), SQLite, Jupyter Notebook
+
+#### Key Findings
+- **Only 26.5% retention** (265 of 1,000) of 2021's top streamers were still top-1000 by 2024 — the platform's top tier is far more volatile than a single-year snapshot suggests
+- **Sunday is a statistically real effect**, not noise: streamers most often hit peak follower gains on Sunday (358 of 999), confirmed via chi-square goodness-of-fit (χ² = 433.3, p < 0.001)
+- **League of Legends streamers show a real language skew** relative to the platform overall (χ² = 38.19, p = 0.0037), though flagged with a caveat around low expected counts in some language categories — an example of testing a finding rather than just reporting it
+- Manual genre classification left "Other" as the second-largest category (234 of 999 streamers), surfaced as an explicit limitation rather than smoothed over
+
+#### Deliverables
+- [Ingestion Script](https://github.com/amufti12/Twitch-Streamer-Retention-Analysis/blob/main/ingest.py) · [Analysis Notebook](https://github.com/amufti12/Twitch-Streamer-Retention-Analysis/blob/main/analysis.ipynb)
+- Full methodology, significance testing rationale, and stated limitations documented in repository README
+
 ---
  
 ## NHTSA Vehicle Complaints — Azure Cloud Pipeline & Power BI Dashboard <a name="nhtsa-powerbi"></a>
