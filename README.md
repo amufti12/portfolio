@@ -14,11 +14,12 @@ aydanmufti@gmail.com &nbsp;|&nbsp; [github.com/amufti12](https://github.com/amuf
 2. [HuffPost News Classification (DistilBERT)](#huffpost-classification)
 3. [Elden Ring Build Optimizer Agent](#elden-ring-agent)
 4. [Twitch Streamer Retention Analysis](#twitch-retention)
-5. [NHTSA Vehicle Complaints - Azure Cloud Pipeline & Power BI Dashboard](#nhtsa-powerbi)
-6. [AlgoViz - Sorting Algorithm Visualizer](#algoviz)
-7. [N-Body Gravitational Simulator](#nbody-simulator)
-8. [Spotify Song Prediction](#song-prediction)
-9. [Video-to-Video Synthesis (C-Day 2021)](#vid2vid)
+5. [Starbucks Offer Uplift Modeling](#starbucks-uplift)
+6. [NHTSA Vehicle Complaints - Azure Cloud Pipeline & Power BI Dashboard](#nhtsa-powerbi)
+7. [AlgoViz - Sorting Algorithm Visualizer](#algoviz)
+8. [N-Body Gravitational Simulator](#nbody-simulator)
+9. [Spotify Song Prediction](#song-prediction)
+10. [Video-to-Video Synthesis (C-Day 2021)](#vid2vid)
 
 ---
 
@@ -155,6 +156,30 @@ A cross-year SQL and Python analysis of Twitch's top 1,000 streamers, comparing 
 #### Deliverables
 - [Ingestion Script](https://github.com/amufti12/Twitch-Streamer-Retention-Analysis/blob/main/ingest.py) · [Analysis Notebook](https://github.com/amufti12/Twitch-Streamer-Retention-Analysis/blob/main/analysis.ipynb)
 - Full methodology, significance testing rationale, and stated limitations documented in repository README
+
+---
+
+## [Starbucks Offer Uplift Modeling](https://github.com/amufti12/Starbucks-Promotion-Causal-Analysis) <a name="starbucks-uplift"></a>
+
+#### Overview
+A causal inference analysis of Starbucks' promotional offer data, built around a different question than most public treatments of this dataset ask. Rather than predicting whether a customer will complete an offer, this project isolates uplift: who does a discount or BOGO offer causally move to spend more, versus who would have converted anyway, and what that means for revenue if offers were targeted more selectively. Uses simulated Starbucks rewards-app data (provided by Starbucks via Udacity's Data Scientist Nanodegree), since no public dataset containing real subscription or in-app monetization figures exists.
+
+#### Technical Details
+- **Dataset**: [Starbucks App Customer Rewards Program Data](https://www.kaggle.com/datasets/faisk/starbucks-app-customer-reward-program-data) — 17,000 customers, 306,534 events over a simulated 30-day window, 10 promotional offers (BOGO, discount, informational)
+- **Pipeline**: Merged three source files (offer metadata, customer demographics, event log) into a single clean table, resolving an overloaded field in the event log that stores either an offer ID or a transaction amount depending on event type, and explicitly treating a known missing-data placeholder (age=118) as missing rather than a real value
+- **Methodology**: Validated offer-assignment randomization (ANOVA + chi-square) before any causal claim; measured the causal effect of offer receipt on spend rate using a paired within-customer comparison; trained a Random Forest to predict individual-level uplift and validated it by rank-ordering rather than relying on R² alone; segmented customers into targeting categories and translated the segmentation into a net revenue comparison across policies
+- **Tools**: Python (pandas, NumPy, SciPy, scikit-learn, matplotlib), Jupyter Notebook
+
+#### Key Findings
+- **Randomization validated before any causal claim**: age, income, tenure, and gender were all statistically balanced across offer types (all p > 0.36) — a checkpoint most public analyses of this dataset skip
+- **Offers cause a real spend lift**: receiving an offer increases spend rate by ~$0.105/hr on average versus a customer's own no-offer baseline (paired t-test: t = 45.440, p < 0.000001)
+- **The effect is highly uneven across customers**: despite a low model R² (0.069, expected for an individual-level treatment effect derived from two noisy rate measurements), predicted uplift rank-ordered customers well — actual uplift rose ~12x from the lowest to highest predicted-uplift decile
+- **A real, quantifiable inefficiency surfaced**: a "Sure Thing" segment (20% of customers, already high baseline spenders) showed *negative* average uplift, yet 38.5% still completed their offer and triggered a real reward payout
+- **Targeting is an efficiency-vs-total-revenue tradeoff, not a strict win**: blanket targeting captures the most total revenue ($686,211), but net revenue per customer targeted rises steadily as targeting narrows to higher-predicted-uplift customers, from $49.30/customer (blanket) to $117.26/customer (top predicted-uplift quartile), with no plateau found in the range tested
+
+#### Deliverables
+- Five-phase notebook pipeline: data engineering → randomization check → causal estimate → uplift modeling → revenue impact, each with a stated conclusion and inline visualizations
+- Full methodology, key findings, figure index, and stated limitations documented in repository README
 
 ---
  
